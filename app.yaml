@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: script-push
+  labels:
+    app: scripts
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: scripts
+  template:
+    metadata:
+      labels:
+        app: scripts
+    spec:
+      containers:
+      - name: script-push
+        image: gcr.io/mechmania2017/script-push:latest
+        ports:
+        - containerPort: 3000
+        env:
+          - name: MONGO_URL
+            valueFrom:
+              secretKeyRef:
+                name: creds
+                key: mongo
+          - name: RABBITMQ_URI
+            valueFrom:
+              secretKeyRef:
+                name: creds
+                key: rabbitmq
+          - name: AWS_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: creds
+                key: aws_access_key_id
+          - name: AWS_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: creds
+                key: aws_secret_access_key
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: script-push-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: scripts
+  ports:
+  - port: 80
+    name: script-push-service
+    targetPort: 3000
+    protocol: TCP

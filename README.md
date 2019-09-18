@@ -1,2 +1,4 @@
-# mm-queue-all
-Micro-service that queues all round robin games in case of disaster
+# script-push
+
+`yarn`
+`dotenv yarn start` (make sure you have the mm .env file)
