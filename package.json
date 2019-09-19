@@ -1,5 +1,5 @@
 {
-  "name": "script-push",
+  "name": "queue-all",
   "scripts": {
     "start": "micro .",
     "deploy": "./deploy.sh"
