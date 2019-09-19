@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: script-push
+  name: queue-all
   labels:
-    app: scripts
+    app: queue-all
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
-      app: scripts
+      app: queue-all
   template:
     metadata:
       labels:
-        app: scripts
+        app: queue-all
     spec:
       containers:
-      - name: script-push
-        image: gcr.io/mechmania2017/script-push:latest
+      - name: queue-all
+        image: gcr.io/mechmania2017/queue-all:latest
         ports:
         - containerPort: 3000
         env:
@@ -30,27 +30,17 @@ spec:
               secretKeyRef:
                 name: creds
                 key: rabbitmq
-          - name: AWS_ACCESS_KEY_ID
-            valueFrom:
-              secretKeyRef:
-                name: creds
-                key: aws_access_key_id
-          - name: AWS_SECRET_ACCESS_KEY
-            valueFrom:
-              secretKeyRef:
-                name: creds
-                key: aws_secret_access_key
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: script-push-service
+  name: queue-all-service
 spec:
   type: LoadBalancer
   selector:
-    app: scripts
+    app: queue-all
   ports:
   - port: 80
-    name: script-push-service
+    name: queue-all-service
     targetPort: 3000
     protocol: TCP
