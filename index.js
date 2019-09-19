@@ -33,7 +33,7 @@ module.exports = authenticate(async (req, res) => {
   });
 
   console.log("Grabbing all teams...");
-  const allTeams = await Promise.all(Team.find().exec());
+  const allTeams = await Team.find().populate("latestScript").exec();
 
   if (allTeams.length == 0) {
     send(res, 401, "Error: there are no teams to queue games!");
@@ -43,11 +43,15 @@ module.exports = authenticate(async (req, res) => {
   console.log("Sending everyone off to stanchion...");
 
   allTeams.forEach(team => {
-    id = team.id;
-    console.log(`${id} - Notifying ${STANCHION_QUEUE}`);
-    ch.sendToQueue(STANCHION_QUEUE, Buffer.from(id), {
-      persistent: true
-    });
+    if (team.latestScript) {
+      scriptKey = team.latestScript.key;
+      console.log(`${scriptKey} - Notifying ${STANCHION_QUEUE}`);
+      ch.sendToQueue(STANCHION_QUEUE, Buffer.from(scriptKey), {
+        persistent: true
+      });
+    } else {
+      console.log(`There are no logs for ${team}`);
+    }
   });
 
   send(res, 200, "All games queued!");
