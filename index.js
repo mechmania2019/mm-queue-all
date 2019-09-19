@@ -9,12 +9,17 @@ const amqp = require("amqplib");
 const RABBITMQ_URI = process.env.RABBITMQ_URI || "amqp://localhost";
 const STANCHION_QUEUE = `stanchionQueue`;
 
-mongoose.connect(process.env.MONGO_URL);
+mongoose.connect(process.env.MONGO_URL, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+});
+mongoose.set("useCreateIndex", true);
 mongoose.Promise = global.Promise;
 
 module.exports = authenticate(async (req, res) => {
   if (!req.user.admin) {
     send(res, 401, "Error: user does not have admin priveleges.");
+    return;
   }
 
   const conn = await amqp.connect(RABBITMQ_URI);
@@ -32,6 +37,7 @@ module.exports = authenticate(async (req, res) => {
 
   if (allTeams.length == 0) {
     send(res, 401, "Error: there are no teams to queue games!");
+    return;
   }
 
   console.log("Sending everyone off to stanchion...");
